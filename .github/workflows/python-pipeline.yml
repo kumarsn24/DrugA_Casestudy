@@ -1,0 +1,52 @@
+name: Python CI Pipeline
+
+# Trigger the pipeline on pushes or pull requests to the main branch
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Download the repository code onto the runner
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 2. Set up the specific Python version
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-python-version: '3.14' # Change to your preferred Python version
+
+    # 3. Cache dependencies to make future runs faster
+    - name: Cache pip packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    # 4. Install project dependencies
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest # Installs testing tools
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    # 5. Check style errors or syntax issues (Linting)
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings.
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    # 6. Run your automated test suite
+    - name: Run tests with pytest
+      run: |
+        pytest
