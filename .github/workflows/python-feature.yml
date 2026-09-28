@@ -43,4 +43,4 @@ jobs:
     # Step 5: Run your automated Python test suite
     - name: Test with pytest
       run: |
-        pytest
+        python -m pytest
