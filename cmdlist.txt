@@ -1,0 +1,30 @@
+Data Preprocessing Command : python data_preprocess.py
+Model Training and Inference : python .\model_train_and_infer.py train --config .\config.ini
+
+WebServer Startup Command: uvicorn DiseaseX_EMRAlerts.fastapi_app:app --host 127.0.0.1 --port 8001
+WebServer Health Check-up: curl http://127.0.0.1:8001/health
+WebServer Model Metadata: curl http://127.0.0.1:8001/model/info
+Webserver API Call: 
+a) curl.exe -X POST "http://127.0.0.1:8001/predict" -H "Content-Type: application/json" -d @DiseaseX_EMRAlerts\payload_01.json
+b) curl.exe -X POST "http://127.0.0.1:8001/predict" -H "Content-Type: application/json" -d @DiseaseX_EMRAlerts\payload_02.json
+
+netstat -ano | findstr ":8001"
+Get-Process chrome | Format-Table Id, ProcessName, Path
+Stop-Process -Id <PID> -Force
+Stop-Process -Id 12140 -Force
+
+.venv\Scripts\Activate.ps1
+
+# --- Add Python user Scripts to PATH (PowerShell) ---
+# Temporary (current session only):
+# Replace 'Python314' with your installed Python folder if different
+$pyScripts = Join-Path $env:USERPROFILE "AppData\Roaming\Python\Python314\Scripts"
+$env:Path += ";$pyScripts"
+# Verify: echo $env:Path; Get-Command uvicorn -ErrorAction SilentlyContinue
+
+# Persist for current user (will apply to new terminals):
+# Replace 'Python314' if needed. This writes to the user PATH and requires re-opening shells.
+[Environment]::SetEnvironmentVariable("Path", $env:Path + ";$pyScripts", "User")
+# After running above, open a new PowerShell window and run: uvicorn --version
+
+# GUI option: Settings -> System -> About -> Advanced system settings -> Environment Variables -> Edit PATH -> Add the Scripts folder path

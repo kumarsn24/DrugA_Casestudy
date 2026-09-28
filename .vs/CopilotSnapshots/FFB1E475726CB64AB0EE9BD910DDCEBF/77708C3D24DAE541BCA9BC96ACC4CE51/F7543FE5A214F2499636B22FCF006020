@@ -1,0 +1,15 @@
+﻿Data Preprocessing Command : python data_preprocess.py
+Model Training and Inference : python .\model_train_and_infer.py train --config .\config.ini
+
+WebServer Startup Command: uvicorn DiseaseX_EMRAlerts.fastapi_app:app --host 0.0.0.0 --port 8001
+WebServer Health Check-up: curl http://127.0.0.1:8001/health
+WebServer Model Metadata: curl http://127.0.0.1:8001/model/info
+Webserver API Call: 
+a) curl.exe -X POST "http://127.0.0.1:8001/predict" -H "Content-Type: application/json" -d @DiseaseX_EMRAlerts\payload_01.json
+b) curl.exe -X POST "http://127.0.0.1:8001/predict" -H "Content-Type: application/json" -d @DiseaseX_EMRAlerts\payload_02.json
+
+netstat -ano | findstr ":8000"
+Get-Process chrome | Format-Table Id, ProcessName, Path
+Stop-Process -Id <PID> -Force
+
+.venv\Scripts\Activate.ps1

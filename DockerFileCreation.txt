@@ -1,0 +1,30 @@
+Dockerfile (place at project root alongside DiseaseX_EMRAlerts/)
+FROM python:3.12-slim
+keep Python output unbuffered
+ENV PYTHONUNBUFFERED=1
+Create app directory
+WORKDIR /app
+Install build deps if any native wheels need building (kept minimal)
+RUN apt-get update && 
+apt-get install -y --no-install-recommends build-essential && 
+rm -rf /var/lib/apt/lists/*
+Copy and install Python dependencies (leverage Docker cache)
+COPY DiseaseX_EMRAlerts/requirements.txt /app/requirements.txt RUN python -m pip install --upgrade pip setuptools wheel && 
+python -m pip install --no-cache-dir -r /app/requirements.txt
+Copy application code
+COPY DiseaseX_EMRAlerts /app/DiseaseX_EMRAlerts
+Create non-root user and give ownership
+RUN useradd --create-home appuser && chown -R appuser:appuser /app USER appuser
+Expose port and default model path can be overridden with ENV or config.ini
+EXPOSE 8000 ENV HOST=0.0.0.0 ENV PORT=8000
+Start uvicorn (use MODEL_PATH env to override if needed)
+CMD ["uvicorn", "DiseaseX_EMRAlerts.fastapi_app:app", "--host", "0.0.0.0", "--port", "8000"]
+Build/run (examples)
+•	Build: docker build -t rf-api:latest .
+•	Run (mount model or override MODEL_PATH if needed): docker run --rm -p 8000:8000 
+-v /full/path/to/random_forest_pipeline.pkl:/app/DiseaseX_EMRAlerts/random_forest_pipeline.pkl 
+rf-api:latest
+•	Or override with env: docker run --rm -p 8000:8000 -e MODEL_PATH=/models/my_pipeline.pkl -v /host/models:/models rf-api:latest
+Notes
+•	If your model depends on native libs not covered by wheels, add required apt packages before pip install.
+•	Use a production process manager (multiple workers, gunicorn with uvicorn workers) for production deployments.
