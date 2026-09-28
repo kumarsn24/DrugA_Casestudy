@@ -20,7 +20,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-python-version: '3.14' # Change to your preferred Python version
+        python-version: '3.11'
 
     # 3. Cache dependencies to make future runs faster
     - name: Cache pip packages
