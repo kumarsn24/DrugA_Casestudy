@@ -1,0 +1,49 @@
+name: Python Feature Pipeline
+
+# 1. Trigger the pipeline on pushes to feature branches and pull requests to main
+on:
+  push:
+    branches:
+      - 'feature/*'
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Step 1: Download the repository code to the virtual machine
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Step 2: Install and configure Python on the runner
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11' # Change to your preferred Python version
+        cache: 'pip'          # Automatically caches dependencies to speed up future runs
+
+    # Step 3: Upgrade pip and install development dependencies
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install flake8 pytest
+        if [ -f requirements.txt ]; then python -m pip install -r requirements.txt; fi
+
+    # Step 4: Check for code style and syntax errors (Linting)
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        python -m flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. Lower complexity makes code easier to read.
+        python -m flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    # Step 5: Run your automated Python test suite
+    - name: Test with pytest
+      run: |
+        python -m pytest
