@@ -1,10 +1,5 @@
-import os
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
-import pytest
-
 import model_train_and_infer as mti
 
 
